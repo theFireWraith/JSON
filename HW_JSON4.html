@@ -1,0 +1,130 @@
+<html>
+<head>
+<title>Homework 4 </title>
+<script>
+function generateHTML(jsonObj)
+   {     
+           if(!("Row" in jsonObj.Mainline.Table))
+           return 0;  
+           root=jsonObj.DocumentElement; 
+           html_text="<html><head><title>US Airlines Listing</title></head><body>";
+           html_text+="<table border='2'>";
+           
+           data=jsonObj.Mainline.Table.Header.Data; 
+           headValues=data;
+           
+           html_text+="<tr>";
+           x=450;  y=200;
+	      
+           for(i=0;i<headValues.length;i++)
+           {  
+			       header=headValues[i];
+				   
+			       html_text+="<th>"+header+"</th>";    
+			}
+			
+           html_text+="</tr>";
+           
+           var rowValues=jsonObj.Mainline.Table.Row;
+           for(i=0;i<rowValues.length;i++)
+           {
+               html_text+="<tr>";
+               var PlaneList=rowValues[i];
+               html_text+="<td>"+PlaneList.Airline+"</td>";
+               html_text+="<td>"+PlaneList.IATA+"</td>";
+              var hub=PlaneList.Hubs.Hub;
+               if(hub.length>0)
+               {
+                html_text+="<td><ul><li><b>";
+                var j=0;
+                html_text+=hub[j]+"</b></li>"; 
+                for(j=0;j<hub.length;j++)
+                {
+                  html_text+="<li>"+hub[j]+"</li>"; 
+                }
+               }
+               else
+                   html_text+="<td> </td>";   
+               html_text+="</ul></td>";
+               html_text+="<td>"+PlaneList.Notes+"</td>";
+               html_text+="<td><a href='"+PlaneList.HomePage+"'>"+PlaneList.HomePage+"</td>";
+               html_text+="<td><img src='" +PlaneList.Plane+ "'width='"+x+"' height='"+y+"'></td>";
+               html_text+="</tr>";
+           }
+               
+          //html_text+="</tbody>";  
+           html_text+="</table>";
+           html_text+="</body></html>";  
+}
+
+function viewJSON()
+{
+  URL=document.getElementById("Ur1").value;
+   
+   if(URL=="")
+   alert("URL empty");
+ 
+   else
+  {
+    function loadJSON(url) 
+	{
+      if (window.XMLHttpRequest)
+      {
+	   // code for IE7+, Firefox, Chrome, Opera, Safari
+       xmlhttp=new XMLHttpRequest();
+	  }
+         xmlhttp.open("GET",url,false);
+        try{
+        xmlhttp.send();
+        }
+        catch(err)
+        {
+            alert("Invalid File");
+            return;
+        }
+      if(xmlhttp.status==404)
+        return 0;
+      try
+      {
+      jsonObj= JSON.parse(xmlhttp.responseText);
+      }
+      catch(err)
+      {
+          alert("JSON Parse Error"); 
+      }
+      return jsonObj;   
+	}
+  
+    jsonObj = loadJSON(URL);
+    if(jsonObj==0)
+    alert("File Does Not Exist");
+ 
+    var t=generateHTML(jsonObj);
+    if(t==0)
+    alert("File has no Data");
+    else
+    {
+	jsonObj.onload=generateHTML(jsonObj);
+    hWin = window.open("", "HW4", "height=800,width=1400");
+    hWin.document.write(html_text);  
+	}
+    hWin.document.close(); 
+    }
+  }
+
+ </script>
+ </head>
+<body> 
+<br/>
+<br/>
+<br/>
+<h3 style="text-align: center;">Enter URL for Airlines List JSON File </h3>
+<form style="text-align: center;" name="myform" method="POST" id="location">
+<input type="text" id="Ur1" name="URL"  size="20" />
+<br />
+<br/>
+<input type="button" name="submit" value="Submit Query" onClick="viewJSON()" />
+</form>
+<noscript></noscript>
+</body>
+</html>
